@@ -41,10 +41,6 @@ export function CardProcessing({
     return "XỬ LÝ QUẸT THẺ"
   }
 
-  const getCustomerTypeLabel = (type: CustomerType) => {
-    return type === "visitor" ? "Khách vãng lai" : "Nội bộ (Sinh viên/ Giảng viên)"
-  }
-
   const getErrorMessage = () => {
     switch (formStatus) {
       case "error":

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/parking/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,11 +17,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
   Cell,
-  PieChart,
-  Pie,
 } from "recharts";
 import { AlertCircle, Download, FileSpreadsheet, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";

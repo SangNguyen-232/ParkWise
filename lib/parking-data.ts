@@ -1,5 +1,3 @@
-
-
 export type ZoneId = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export type SlotStatus = 'empty' | 'available' | 'occupied' | 'reserved' | 'maintenance';
 export type ZoneMode = 'active' | 'offline' | 'maintenance';
@@ -288,8 +286,6 @@ export const userAccount: UserAccount = {
   totalDebt: 0,
 };
 
-export const transactionPersistenceLog: Array<{ action: string; transactionIds: string[]; createdAt: Date; transactionCode?: string }> = [];
-
 export function calculateTotalDebt(): number {
   return billingSessions.filter((session) => session.status === 'unpaid').reduce((sum, session) => sum + session.finalFee, 0);
 }
@@ -325,24 +321,6 @@ export function getPaidTransactions(): Transaction[] {
   return billingSessions.filter((session) => session.status === 'paid');
 }
 
-export function getHistoryForUser(_userId: string): Transaction[] {
-  return billingSessions;
-}
-
-export function filterHistorySessions(
-  userId: string,
-  startTime?: Date | null,
-  endTime?: Date | null,
-  plate?: string | null,
-): Transaction[] {
-  return getHistoryForUser(userId).filter((session) => {
-    if (startTime && session.checkInTime < startTime) return false;
-    if (endTime && session.checkInTime > endTime) return false;
-    if (plate && !session.licensePlate.toLowerCase().includes(plate.toLowerCase())) return false;
-    return true;
-  });
-}
-
 export function processPayment(transactionIds: string[]): { success: boolean; transactionCode?: string; message?: string; newBalance?: number; newDebt?: number } {
   const selected = billingSessions.filter((session) => transactionIds.includes(session.id) && session.status === 'unpaid');
   if (selected.length === 0) {
@@ -365,7 +343,6 @@ export function processPayment(transactionIds: string[]): { success: boolean; tr
 
   userAccount.balance -= amount;
   syncUserAccountFromEntity();
-  transactionPersistenceLog.push({ action: 'PAYMENT_SETTLED', transactionIds, createdAt: paymentTime, transactionCode });
 
   return { success: true, transactionCode, newBalance: userAccount.balance, newDebt: userAccount.totalDebt };
 }
@@ -390,26 +367,6 @@ export function generateReceiptForSessions(sessionIds: string[]): Receipt | null
     generatedAt: new Date(),
   };
 }
-
-export const userAccountEntity = {
-  userId: userAccount.id,
-  fullName: userAccount.name,
-  role: userAccount.role,
-  email: userAccount.email,
-  getCurrentBalance: () => userAccount.balance,
-  calculateTotalDebt: () => calculateTotalDebt(),
-  getPendingSessions: () => getUnpaidTransactions(),
-};
-
-export const paymentController = {
-  settleSessions: processPayment,
-};
-
-export class ParkingSession {}
-export class UserAccountEntity {}
-export class PaymentController {}
-export class PaymentTransactionEntity {}
-
 
 // ===============================
 // UC5 - Vận hành cổng / xử lý ngoại lệ xe ra
@@ -541,7 +498,6 @@ export const incidentTickets: IncidentTicket[] = [
 export const PARKING_RATE_PER_HOUR = 5000;
 export const LOST_CARD_PENALTY = 50000;
 export const GUEST_LOST_CARD_PENALTY = 100000;
-export const ILLEGAL_EXIT_FINE = 100000;
 
 export function calcParkingFee(checkInTime: Date): number {
   const hours = Math.max(1, Math.ceil((Date.now() - checkInTime.getTime()) / (1000 * 60 * 60)));

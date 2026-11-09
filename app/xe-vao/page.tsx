@@ -18,7 +18,7 @@ export default function ParkingEntryPage() {
   const [formStatus, setFormStatus] = useState<FormStatus>("normal")
   
   // Form state
-  const [detectedPlate, setDetectedPlate] = useState("51H-987.65")
+  const detectedPlate = "51H-987.65"
   const [cardId, setCardId] = useState("1234567890")
   const [customerType, setCustomerType] = useState<CustomerType>("internal")
   const [fullName, setFullName] = useState("Nguyễn Văn A")

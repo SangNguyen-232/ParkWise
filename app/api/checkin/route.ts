@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Slot not found' }, { status: 404 });
     }
     
-    if (slot.status !== 'available') {
+    if (slot.status !== 'available' && slot.status !== 'empty') {
       return NextResponse.json({ error: 'Slot is not available' }, { status: 400 });
     }
     

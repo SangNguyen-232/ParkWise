@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
-import { Analytics } from '@vercel/analytics/next'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Hệ thống quản lý bãi xe',
   description: 'Hệ thống quản lý bãi đỗ xe thông minh - Bản đồ & Định vị',
+  icons: { icon: '/bk-logo.png' },
 }
 
 export default function RootLayout({
@@ -16,7 +17,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className="font-sans antialiased">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Toaster richColors />
       </body>
     </html>
   )

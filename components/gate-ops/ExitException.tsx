@@ -164,14 +164,6 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
   const userTypeLabel = (s: ActiveSession) =>
     s.userType === 'student' ? 'Sinh viên' : s.userType === 'staff' ? 'Cán bộ' : 'Khách';
 
-  // Chỉ hiển thị "Đang gửi" - trạng thái thẻ do nhân viên bảo vệ quyết định khi xử lý
-  const cardStatusStyle = () => {
-    return 'bg-[#D1FAE5] text-[#059669] border-[#059669]/20';
-  };
-  const cardStatusLabel = () => {
-    return 'Đang gửi';
-  };
-
   const remainingAfterClose = matchedSessions.filter(s => s.id !== closedSessionId);
 
   // Xử lý upload ảnh
@@ -374,8 +366,8 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
                       </p>
                       <p className="text-xs font-semibold text-[#10B981]">{formatVND(calcParkingFee(session.checkInTime))}</p>
                     </div>
-                    <Badge className={`text-xs border ${cardStatusStyle(session)}`}>
-                      {cardStatusLabel(session)}
+                    <Badge className="text-xs border bg-[#D1FAE5] text-[#059669] border-[#059669]/20">
+                      Đang gửi
                     </Badge>
                     {session.status === 'flagged' && (
                       <Badge className="bg-[#FEE2E2] text-[#EF4444] border-[#EF4444]/20 text-xs">

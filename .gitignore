@@ -12,5 +12,13 @@ next.user-config.*
 
 # Common ignores
 node_modules
+.pnpm-store/
 .next/
+next-env.d.ts
+out/
+*.tsbuildinfo
+*.log
+coverage/
+test-results/
+playwright-report/
 .DS_Store

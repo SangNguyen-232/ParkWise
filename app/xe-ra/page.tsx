@@ -14,10 +14,10 @@ export default function ParkingExitPage() {
   const [systemStatus, setSystemStatus] = useState<SystemStatus>("online")
   const [exitStatus, setExitStatus] = useState<ExitStatus>("valid")
   const [currentPlate, setCurrentPlate] = useState("51H-987.65")
-  const [originalPlate] = useState("51H-987.65")
-  const [cardId] = useState("1234567890")
+  const originalPlate = "51H-987.65"
+  const cardId = "1234567890"
   const [customerType, setCustomerType] = useState<CustomerType>("internal")
-  const [customerName] = useState("NGUYỄN VĂN A")
+  const customerName = "NGUYỄN VĂN A"
   const [isManualEntryMode, setIsManualEntryMode] = useState(false)
   const [manualPlateInput, setManualPlateInput] = useState("")
 

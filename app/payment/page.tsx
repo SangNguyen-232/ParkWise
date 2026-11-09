@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/parking/Header';
 
@@ -158,7 +158,7 @@ export default function PaymentPage() {
         setShowPaymentDialog(false);
         setShowErrorDialog(true);
       }
-    } catch (error) {
+    } catch {
       setErrorMessage('Đã xảy ra lỗi trong quá trình xử lý thanh toán.');
       setShowPaymentDialog(false);
       setShowErrorDialog(true);
@@ -404,7 +404,10 @@ export default function PaymentPage() {
                 </div>
 
                 <button
-                  onClick={() => setShowPaymentDialog(true)}
+                  onClick={() => {
+                    setErrorMessage('');
+                    setShowPaymentDialog(true);
+                  }}
                   style={{ width: 'fit-content', minWidth: '400px', height: '90px', background: '#399FD6', border: '2px solid #CBD5E1', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)', borderRadius: '20px', fontFamily: "'Roboto Condensed', sans-serif", fontSize: '50px', color: '#FFFFFF', cursor: 'pointer', marginTop: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', padding: '0 30px' }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', lineHeight: 0 }}>💵</span> Xác nhận thanh toán
@@ -431,7 +434,6 @@ export default function PaymentPage() {
             <div style={{ fontSize: '30px', display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px', color: '#0284C7' }}>
               💳 Thanh toán qua BKPay
             </div>
-            <p style={{ fontSize: '30px', marginBottom: '20px', color: '#64748B' }}></p>
             
             <div style={{ background: '#E0F2FE', border: '2px solid #64748B', boxShadow: '0px 5px 5px rgba(0, 0, 0, 0.25)', borderRadius: '20px', padding: '20px 40px', marginBottom: '20px', fontSize: '30px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -456,6 +458,7 @@ export default function PaymentPage() {
                       const newOtp = otp.split('');
                       newOtp[index] = e.target.value.slice(-1);
                       setOtp(newOtp.join(''));
+                      setErrorMessage('');
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Backspace' && !otp[index]) {
@@ -475,6 +478,11 @@ export default function PaymentPage() {
                   />
                 ))}
               </div>
+              {errorMessage && (
+                <p role="alert" style={{ color: '#EF4444', fontSize: '20px', marginTop: '15px' }}>
+                  {errorMessage}
+                </p>
+              )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '80px', marginTop: '40px' }}>
@@ -564,6 +572,7 @@ export default function PaymentPage() {
                   setShowErrorDialog(false);
                   setShowPaymentDialog(true);
                   setOtp('');
+                  setErrorMessage('');
                 }}
                 style={{ height: '60px', border: '2px solid #64748B', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)', borderRadius: '15px', fontFamily: "'Roboto Condensed', sans-serif", fontWeight: 700, fontSize: '30px', color: '#FFFFFF', background: '#FF2116', cursor: 'pointer', padding: '0 40px' }}
               >

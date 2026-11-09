@@ -13,9 +13,7 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(join(__dirname, '../public')));
-// ==============================================================
-// 1. MẢNG DỮ LIỆU TÀI KHOẢN (MỚI THÊM VÀO)
-// ==============================================================
+// Demo accounts for the application's five roles.
 const users = [
   // Ban quản lý: quản lý chính sách định giá, báo cáo và xem tổng quan bãi đỗ
   { username: 'bql01', password: '123', name: 'Trần Hoàng Quốc Bảo', role: 'Ban quản lý' },
@@ -32,9 +30,7 @@ const users = [
   { username: 'cb01', password: '123', name: 'Cán bộ Test', role: 'Giảng viên/Cán bộ' }
 ];
 
-// ==============================================================
-// 2. API ĐĂNG NHẬP (MỚI THÊM VÀO)
-// ==============================================================
+// Login
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -109,22 +105,29 @@ const parkingSlots = {
 
 // API Routes
 
+const getZoneWithOccupancy = (zone) => {
+  const slots = parkingSlots[zone.id] || [];
+  const availableSlots = slots.filter(slot => slot.status === 'available').length;
+  const occupiedSlots = slots.filter(slot => slot.status === 'occupied').length;
+
+  return {
+    ...zone,
+    availableSlots,
+    occupiedSlots,
+    occupancyRate: zone.status === 'maintenance' ? null : Math.round((occupiedSlots / zone.totalSlots) * 100),
+  };
+};
+
+const findSlotById = (slotId) => {
+  for (const slots of Object.values(parkingSlots)) {
+    const slot = slots.find(item => item.id === slotId);
+    if (slot) return slot;
+  }
+};
+
 // Get all zones with occupancy info
 app.get('/api/zones', (req, res) => {
-  const zonesWithOccupancy = zones.map(zone => {
-    const slots = parkingSlots[zone.id] || [];
-    const availableSlots = slots.filter(s => s.status === 'available').length;
-    const occupiedSlots = slots.filter(s => s.status === 'occupied').length;
-    
-    return {
-      ...zone,
-      availableSlots,
-      occupiedSlots,
-      occupancyRate: zone.status === 'maintenance' ? null : Math.round((occupiedSlots / zone.totalSlots) * 100),
-    };
-  });
-  
-  res.json(zonesWithOccupancy);
+  res.json(zones.map(getZoneWithOccupancy));
 });
 
 // Get single zone
@@ -134,16 +137,7 @@ app.get('/api/zones/:id', (req, res) => {
     return res.status(404).json({ error: 'Zone not found' });
   }
   
-  const slots = parkingSlots[zone.id] || [];
-  const availableSlots = slots.filter(s => s.status === 'available').length;
-  const occupiedSlots = slots.filter(s => s.status === 'occupied').length;
-  
-  res.json({
-    ...zone,
-    availableSlots,
-    occupiedSlots,
-    occupancyRate: zone.status === 'maintenance' ? null : Math.round((occupiedSlots / zone.totalSlots) * 100),
-  });
+  res.json(getZoneWithOccupancy(zone));
 });
 
 // Get slots for a zone
@@ -160,69 +154,57 @@ app.get('/api/zones/:id/slots', (req, res) => {
 // Update slot status
 app.patch('/api/slots/:id', (req, res) => {
   const { status } = req.body;
-  const slotId = req.params.id;
-  
-  for (const zoneId in parkingSlots) {
-    const slot = parkingSlots[zoneId].find(s => s.id === slotId);
-    if (slot) {
-      slot.status = status;
-      return res.json(slot);
-    }
+  const slot = findSlotById(req.params.id);
+
+  if (!slot) {
+    return res.status(404).json({ error: 'Slot not found' });
   }
-  
-  res.status(404).json({ error: 'Slot not found' });
+
+  slot.status = status;
+  res.json(slot);
 });
 
 // Check in vehicle
 app.post('/api/checkin', (req, res) => {
   const { slotId, licensePlate, vehicleType } = req.body;
   
-  for (const zoneId in parkingSlots) {
-    const slot = parkingSlots[zoneId].find(s => s.id === slotId);
-    if (slot) {
-      if (slot.status !== 'available') {
-        return res.status(400).json({ error: 'Slot is not available' });
-      }
-      slot.status = 'occupied';
-      slot.vehicle = { licensePlate, vehicleType, checkInTime: new Date() };
-      return res.json({ success: true, slot });
-    }
+  const slot = findSlotById(slotId);
+
+  if (!slot) {
+    return res.status(404).json({ error: 'Slot not found' });
   }
-  
-  res.status(404).json({ error: 'Slot not found' });
+  if (slot.status !== 'available') {
+    return res.status(400).json({ error: 'Slot is not available' });
+  }
+
+  slot.status = 'occupied';
+  slot.vehicle = { licensePlate, vehicleType, checkInTime: new Date() };
+  res.json({ success: true, slot });
 });
 
 // Check out vehicle
 app.post('/api/checkout', (req, res) => {
   const { slotId } = req.body;
   
-  for (const zoneId in parkingSlots) {
-    const slot = parkingSlots[zoneId].find(s => s.id === slotId);
-    if (slot) {
-      if (slot.status !== 'occupied') {
-        return res.status(400).json({ error: 'Slot is not occupied' });
-      }
-      const checkInTime = slot.vehicle?.checkInTime;
-      const checkOutTime = new Date();
-      const duration = checkInTime ? Math.ceil((checkOutTime - new Date(checkInTime)) / (1000 * 60 * 60)) : 1;
-      const fee = duration * 10000; // 10,000 VND per hour
-      
-      slot.status = 'available';
-      const vehicle = slot.vehicle;
-      delete slot.vehicle;
-      
-      return res.json({ 
-        success: true, 
-        slot,
-        vehicle,
-        duration,
-        fee,
-        checkOutTime
-      });
-    }
+  const slot = findSlotById(slotId);
+
+  if (!slot) {
+    return res.status(404).json({ error: 'Slot not found' });
   }
-  
-  res.status(404).json({ error: 'Slot not found' });
+  if (slot.status !== 'occupied') {
+    return res.status(400).json({ error: 'Slot is not occupied' });
+  }
+
+  const checkInTime = slot.vehicle?.checkInTime;
+  const checkOutTime = new Date();
+  const duration = checkInTime ? Math.max(1, Math.ceil((checkOutTime - new Date(checkInTime)) / (1000 * 60 * 60))) : 1;
+  const fee = duration * 10000; // 10,000 VND per hour
+
+  slot.status = 'available';
+  const vehicle = slot.vehicle;
+  delete slot.vehicle;
+
+  res.json({ success: true, slot, vehicle, duration, fee, checkOutTime });
 });
 
 // Search zones

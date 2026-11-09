@@ -136,7 +136,7 @@ Ghi chú:
 ### Bước 1: Cài dependencies
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 ### Bước 2: Chạy backend mock API
@@ -144,7 +144,7 @@ pnpm install
 Mở terminal thứ nhất:
 
 ```bash
-node server/index.js
+pnpm server
 ```
 
 Backend chạy tại:
@@ -176,6 +176,15 @@ http://localhost:3000
 ```
 
 Sau đó đăng nhập bằng một trong các tài khoản demo ở trên.
+
+### Kiểm tra mã nguồn và bản dựng
+
+```bash
+pnpm typecheck
+pnpm build
+```
+
+`pnpm typecheck` tạo khai báo route của Next.js trước khi kiểm tra TypeScript. Thư mục `.next`, `node_modules`, các tệp `next-env.d.ts`, `*.tsbuildinfo` và log được sinh ra khi cài đặt hoặc chạy; không cần lưu chúng cùng mã nguồn. Bản dựng kiểm tra cả lỗi TypeScript và khai báo, tham số không dùng.
 
 ## 7. Lưu ý khi test
 

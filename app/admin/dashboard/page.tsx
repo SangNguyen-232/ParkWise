@@ -168,7 +168,6 @@ export default function AdminDashboardPage() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
   const [filter, setFilter] = useState<DeviceFilter>('all');
-  const [clock, setClock] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [operatorMessage, setOperatorMessage] = useState<string | null>(null);
@@ -219,16 +218,6 @@ export default function AdminDashboardPage() {
     }, 30_000);
 
     return () => window.clearInterval(refreshInterval);
-  }, []);
-
-  useEffect(() => {
-    const updateClock = () => {
-      setClock(new Date().toLocaleTimeString('vi-VN', { hour12: false }));
-    };
-
-    updateClock();
-    const clockInterval = window.setInterval(updateClock, 1000);
-    return () => window.clearInterval(clockInterval);
   }, []);
 
   const filteredDevices = useMemo(() => {

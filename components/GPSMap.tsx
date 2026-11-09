@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Navigation, MapPin, Car, Clock, Route, X, ArrowUp, CornerDownLeft, CornerDownRight, CheckCircle2, CircleDot, Play, LocateFixed } from 'lucide-react'
+import { Navigation, MapPin, Car, Clock, Route, X, ArrowUp, CornerDownLeft, CornerDownRight, CheckCircle2, Play, LocateFixed } from 'lucide-react'
 
 interface GPSMapProps {
   selectedZoneId: string | null
@@ -50,8 +50,6 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
   const routeDashArray = isGpsMode ? '0' : '8, 6'
   
   const [userPosition, setUserPosition] = useState<{ x: number; y: number }>({ x: sourceX, y: sourceY }) 
-  const [gpsStatus, setGpsStatus] = useState<'pending' | 'granted' | 'denied'>(isGpsMode ? 'granted' : 'denied')
-  const [hasRealGPS, setHasRealGPS] = useState(isGpsMode)
 
   const zone = selectedZoneId ? zoneInfo[selectedZoneId] : null
   const slots = selectedZoneId ? generateSlots(selectedZoneId) : []
@@ -73,10 +71,8 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
 
     setIsSimulating(false)
     setCurrentStepIndex(-1)
-    setGpsStatus(isGpsMode ? 'granted' : 'denied')
-    setHasRealGPS(isGpsMode)
     setUserPosition({ x: sourceX, y: sourceY })
-  }, [isNavigating, routeMode])
+  }, [isNavigating, sourceX, sourceY])
 
   // Các bước chỉ dẫn cố định
   const getNavigationSteps = () => {
@@ -144,8 +140,8 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
             <div>
               <h2 className="font-bold text-[#1E293B] text-xl">Sơ đồ 2D - {zone?.name}</h2>
               <div className="flex items-center gap-2 text-sm text-[#64748B]">
-                <LocateFixed size={14} className={hasRealGPS ? 'text-[#10B981]' : 'text-[#F59E0B]'} />
-                <span>{hasRealGPS ? 'Chỉ đường từ vị trí GPS hiện tại' : 'Chỉ đường mặc định từ cổng vào'}</span>
+                <LocateFixed size={14} className={isGpsMode ? 'text-[#10B981]' : 'text-[#F59E0B]'} />
+                <span>{isGpsMode ? 'Chỉ đường từ vị trí GPS hiện tại' : 'Chỉ đường mặc định từ cổng vào'}</span>
               </div>
             </div>
           </div>

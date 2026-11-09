@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const balance = Number(body.balance);
 
-    if (Number.isNaN(balance) || balance < 0) {
+    if (!Number.isFinite(balance) || balance < 0) {
       return NextResponse.json({ success: false, message: 'Số dư không hợp lệ.' }, { status: 400 });
     }
 
