@@ -1,6 +1,6 @@
 -- Parking Lot Management System Schema
 
--- Zones table (Khu vực: A, B, C, D, E, F)
+-- Zones table (zones A, B, C, D, E, F)
 CREATE TABLE IF NOT EXISTS zones (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(50) NOT NULL UNIQUE,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS zones (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Parking slots table (Vị trí đỗ xe trong mỗi khu vực)
+-- Parking slots within each zone
 CREATE TABLE IF NOT EXISTS parking_slots (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   zone_id UUID NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS parking_slots (
   UNIQUE(zone_id, slot_number)
 );
 
--- Vehicles table (Thông tin xe)
+-- Vehicle information
 CREATE TABLE IF NOT EXISTS vehicles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   license_plate VARCHAR(20) NOT NULL UNIQUE,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Parking sessions table (Phiên đỗ xe)
+-- Parking sessions
 CREATE TABLE IF NOT EXISTS parking_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slot_id UUID NOT NULL REFERENCES parking_slots(id) ON DELETE CASCADE,

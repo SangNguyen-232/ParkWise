@@ -14,35 +14,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(join(__dirname, '../public')));
 // ==============================================================
-// 1. MẢNG DỮ LIỆU TÀI KHOẢN (MỚI THÊM VÀO)
+// 1. DEMO USER ACCOUNTS
 // ==============================================================
 const users = [
-  // Ban quản lý: quản lý chính sách định giá, báo cáo và xem tổng quan bãi đỗ
+  // Management: pricing policies, reports, and parking overview.
   { username: 'bql01', password: '123', name: 'Trần Hoàng Quốc Bảo', role: 'Ban quản lý' },
-  // IT: quản lý phân quyền và tài khoản nội bộ
+  // IT: role permissions and internal accounts.
   { username: 'it01', password: '123', name: 'Nhân viên IT', role: 'IT' },
-  // Vận hành / Bảo vệ: vận hành cổng, tiếp nhận sự cố, cấu hình bãi đỗ
+  // Operations/security: gate operations, incident handling, and parking configuration.
   { username: 'bv01', password: '123', name: 'Nguyễn Văn Bảo Vệ', role: 'Vận hành' },
-  // Sinh viên: người dùng nội bộ, được dùng bản đồ, thanh toán và lịch sử giao dịch
+  // Students: internal users with access to maps, payments, and transaction history.
   { username: 'sv01', password: '123', name: 'Sinh viên Test', role: 'Sinh viên' },
-  // Giảng viên/Cán bộ: tính là một role chung của người dùng nội bộ
+  // Faculty/staff: a shared role for internal users.
   { username: 'gvcb01', password: '123', name: 'Giảng viên/Cán bộ Test', role: 'Giảng viên/Cán bộ' },
-  // Giữ thêm tài khoản test cũ nếu bạn đã quen dùng, nhưng role vẫn là một nhóm chung
+  // Retain the legacy test accounts under the same faculty/staff role.
   { username: 'gv01', password: '123', name: 'Giảng viên Test', role: 'Giảng viên/Cán bộ' },
   { username: 'cb01', password: '123', name: 'Cán bộ Test', role: 'Giảng viên/Cán bộ' }
 ];
 
 // ==============================================================
-// 2. API ĐĂNG NHẬP (MỚI THÊM VÀO)
+// 2. LOGIN API
 // ==============================================================
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
-  // Tìm user trong mảng
+  // Find a matching account in the demo user list.
   const user = users.find(u => u.username === username && u.password === password);
 
   if (user) {
-    // Trả về thông tin user (kèm role) để Front-end lưu vào localStorage
+    // Return the user profile and role for the frontend to store in localStorage.
     return res.json({
       success: true,
       message: 'Đăng nhập thành công',
@@ -242,7 +242,7 @@ app.get('/api/search', (req, res) => {
 
 
 // ==============================================================
-// 3. MOCK DATA & API CHO UC7 - BÁO CÁO, HEATMAP, ĐỐI SOÁT BKPAY
+// 3. UC7 MOCK DATA AND API: REPORTS, HEATMAP, AND BKPAY RECONCILIATION
 // ==============================================================
 const reconciliationTransactions = [
   { id: 'BKP-1001', time: '2026-05-11 08:30', amount: 5000, internalStatus: 'Thành công', bkpayStatus: 'Thành công', status: 'match' },

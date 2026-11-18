@@ -32,10 +32,10 @@ interface ExitExceptionProps {
   onBarrierChange: (open: boolean) => void;
 }
 
-// Danh sách phiên đang hoạt động (có thể bị xoá sau khi đóng)
+// Active sessions; closed sessions are removed from this pool.
 let sessionPool = [...activeSessions];
 
-// Bảng tra cứu nội bộ theo studentId — lấy từ dữ liệu phiên
+// Internal person lookup keyed by the studentId stored in a session.
 const personMap: Record<string, { name: string; type: 'student' | 'staff'; faculty: string; avatarUrl: string }> = {
   'B20DCCN001': {
     name: 'Trần Văn Bình',
@@ -57,7 +57,7 @@ const personMap: Record<string, { name: string; type: 'student' | 'staff'; facul
   },
 };
 
-/** Hiển thị thông tin SV/CB tự động từ studentId của phiên (chỉ với student/staff) */
+/** Display student/staff details using the session's studentId. */
 function PersonInfo({ session }: { session: ActiveSession }) {
   if (session.userType === 'guest') return null;
 
@@ -105,17 +105,17 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
   const [closedSessionId, setClosedSessionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('damaged');
 
-  // State cho dialog xuất bến khẩn cấp
+  // Emergency exit dialog state.
   const [showEmergencyExitDialog, setShowEmergencyExitDialog] = useState(false);
   const [emergencyCccd, setEmergencyCccd] = useState('');
   const [emergencyPortrait, setEmergencyPortrait] = useState<string | null>(null);
   const portraitInputRef = useRef<HTMLInputElement>(null);
 
-  // State cho dialog khôi phục phiên thủ công
+  // Manual session recovery dialog state.
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
   const [recoveryCardId, setRecoveryCardId] = useState('');
   const [recoveryCardScanned, setRecoveryCardScanned] = useState(false);
-  // Thông tin tự động từ thẻ
+  // Details populated from the simulated card scan.
   const [recoveryCardInfo, setRecoveryCardInfo] = useState<{
     cardId: string;
     ownerName: string;
@@ -144,11 +144,11 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
 
   const handleSelectSession = (session: ActiveSession) => {
     setSelectedSession(session);
-    // Mặc định tab "Hỏng thẻ" - nhân viên bảo vệ sẽ quyết định
+    // Default to the damaged-card tab; the security officer selects the case.
     setActiveTab('damaged');
   };
 
-  // Đóng phiên: xoá khỏi pool, quay về danh sách, hiện banner xanh, báo mở barrier
+  // Close the session, update the list and notification, and signal the barrier to open.
   const handleCloseSession = (sessionId: string, toastMsg: string, toastType: 'success' | 'error') => {
     sessionPool = sessionPool.filter(s => s.id !== sessionId);
     setClosedSessionId(sessionId);
@@ -164,7 +164,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
   const userTypeLabel = (s: ActiveSession) =>
     s.userType === 'student' ? 'Sinh viên' : s.userType === 'staff' ? 'Cán bộ' : 'Khách';
 
-  // Chỉ hiển thị "Đang gửi" - trạng thái thẻ do nhân viên bảo vệ quyết định khi xử lý
+  // Display the parked status; the security officer determines the card condition.
   const cardStatusStyle = () => {
     return 'bg-[#D1FAE5] text-[#059669] border-[#059669]/20';
   };
@@ -174,7 +174,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
 
   const remainingAfterClose = matchedSessions.filter(s => s.id !== closedSessionId);
 
-  // Xử lý upload ảnh
+  // Handle image uploads.
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     setImage: (url: string | null) => void
@@ -186,7 +186,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
     }
   };
 
-  // Xử lý xuất bến khẩn cấp
+  // Handle an emergency exit.
   const handleEmergencyExit = () => {
     if (!emergencyCccd.trim()) {
       onToast('Vui lòng nhập số CCCD.', 'error');
@@ -196,8 +196,8 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
       onToast('Vui lòng chụp ảnh chân dung.', 'error');
       return;
     }
-    // Ảnh xe được chụp tự động từ camera
-    // Đóng dialog và thông báo thành công
+    // The dialog includes a simulated gate camera image.
+    // Close the dialog and report success.
     setShowEmergencyExitDialog(false);
     setEmergencyCccd('');
     setEmergencyPortrait(null);
@@ -205,9 +205,9 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
     onBarrierChange(true);
   };
 
-  // Giả lập quét thẻ - trong thực tế sẽ gọi API đọc thẻ
+  // Simulate a card scan; a real integration would call the card-reader API.
   const handleScanCard = () => {
-    // Giả lập quét thẻ và lấy thông tin (bao gồm thời gian vào và khu gửi từ thẻ)
+    // Simulate reading the card details, including entry time and parking zone.
     const mockCardData = {
       cardId: 'CARD-0099',
       ownerName: 'Nguyễn Văn An',
@@ -223,13 +223,13 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
     onToast('Đã quét thẻ thành công!', 'success');
   };
 
-  // Xử lý khôi phục phiên thủ công
+  // Handle manual session recovery.
   const handleManualRecovery = () => {
     if (!recoveryCardScanned || !recoveryCardInfo) {
       onToast('Vui lòng quét thẻ trước.', 'error');
       return;
     }
-    // Đóng dialog và thông báo thành công
+    // Close the dialog and report success.
     setShowRecoveryDialog(false);
     setRecoveryCardId('');
     setRecoveryCardScanned(false);
@@ -238,7 +238,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
     onBarrierChange(true);
   };
 
-  // Reset khi đóng dialog khôi phục
+  // Reset the recovery state when the dialog closes.
   const handleCloseRecoveryDialog = (open: boolean) => {
     setShowRecoveryDialog(open);
     if (!open) {
@@ -248,13 +248,13 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
     }
   };
 
-  // Kiểm tra có nên hiện nút khẩn cấp không
-  // Hiện khi: chưa nhập gì, hoặc nhập sai (notFound), hoặc không có session được chọn
+  // Show emergency actions only when no session is selected and the search
+  // is empty, has no match, or has an empty result list.
   const shouldShowEmergencyButtons = !selectedSession && (searchPlate.trim() === '' || notFound || matchedSessions.length === 0);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* BUOC 1: Tim kiem */}
+      {/* STEP 1: Search */}
       <Card className="border border-[#E2E8F0]">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-bold text-[#1E293B] flex items-center gap-2">
@@ -277,7 +277,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </CardContent>
       </Card>
 
-      {/* Khong tim thay */}
+      {/* No matching session */}
       {notFound && (
         <Card className="border border-[#EF4444] bg-[#FEF2F2]">
           <CardContent className="pt-4">
@@ -288,7 +288,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </Card>
       )}
 
-      {/* Nút xử lý khẩn cấp - hiện khi chưa tìm thấy phiên hoặc không có kết quả */}
+      {/* Emergency actions for an empty search or no matching sessions */}
       {shouldShowEmergencyButtons && (
         <Card className="border border-amber-300 bg-amber-50">
           <CardContent className="pt-4 flex flex-col gap-3">
@@ -296,7 +296,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               Không tìm thấy phiên? Sử dụng một trong các tùy chọn dưới đây:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Nút Xuất bến khẩn cấp */}
+              {/* Emergency exit button */}
               <Button
                 variant="outline"
                 className="border-[#EF4444] text-[#EF4444] hover:bg-[#FEF2F2] flex items-center gap-2 h-auto py-3"
@@ -309,7 +309,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
                 </div>
               </Button>
 
-              {/* Nút Khôi phục phiên thủ công */}
+              {/* Manual session recovery button */}
               <Button
                 variant="outline"
                 className="border-amber-500 text-amber-700 hover:bg-amber-100 flex items-center gap-2 h-auto py-3"
@@ -326,7 +326,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </Card>
       )}
 
-      {/* Vua dong phien — khong con phien nao */}
+      {/* Session closed with no remaining matches */}
       {closedSessionId && remainingAfterClose.length === 0 && (
         <Card className="border border-[#10B981] bg-[#F0FDF4]">
           <CardContent className="pt-4">
@@ -337,7 +337,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </Card>
       )}
 
-      {/* BUOC 2: Danh sach phien tom gon */}
+      {/* STEP 2: Compact session list */}
       {matchedSessions.filter(s => s.id !== closedSessionId).length > 0 && !selectedSession && (
         <Card className="border border-[#E2E8F0]">
           <CardHeader className="pb-2">
@@ -389,7 +389,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </Card>
       )}
 
-      {/* BUOC 3: Chi tiet phien + xu ly */}
+      {/* STEP 3: Session details and actions */}
       {selectedSession && (
         <>
           <button
@@ -399,7 +399,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
             <ArrowLeft size={14} /> Quay lại danh sách phiên
           </button>
 
-          {/* Anh so sanh */}
+          {/* Image comparison */}
           <div className="grid grid-cols-2 gap-3">
             <Card className="border border-[#E2E8F0]">
               <CardHeader className="pb-2">
@@ -429,7 +429,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
             </Card>
           </div>
 
-          {/* Thong tin phien chi tiet */}
+          {/* Session details */}
           <Card className="border border-[#0284C7] bg-[#F0F9FF]">
             <CardContent className="pt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
               <div className="flex justify-between border-b border-[#0284C7]/20 pb-1">
@@ -479,14 +479,14 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
             </CardContent>
           </Card>
 
-          {/* Tabs xu ly - chỉ còn 2 tab: Hỏng thẻ và Mất thẻ */}
+          {/* Two exception tabs: damaged card and lost card */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full grid grid-cols-2 h-auto p-1">
               <TabsTrigger value="damaged" className="text-xs py-2">Hỏng thẻ</TabsTrigger>
               <TabsTrigger value="lost" className="text-xs py-2">Mất thẻ</TabsTrigger>
             </TabsList>
 
-            {/* Tab: Hong the */}
+            {/* Damaged-card tab */}
             <TabsContent value="damaged">
               <Card className="border border-[#E2E8F0]">
                 <CardContent className="pt-4 flex flex-col gap-3">
@@ -525,7 +525,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               </Card>
             </TabsContent>
 
-            {/* Tab: Mat the */}
+            {/* Lost-card tab */}
             <TabsContent value="lost">
               <Card className="border border-[#E2E8F0]">
                 <CardContent className="pt-4 flex flex-col gap-3">
@@ -561,7 +561,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </>
       )}
 
-      {/* Dialog Xuất bến khẩn cấp */}
+      {/* Emergency exit dialog */}
       <Dialog open={showEmergencyExitDialog} onOpenChange={setShowEmergencyExitDialog}>
         <DialogContent className="max-w-lg bg-white">
           <DialogHeader>
@@ -575,7 +575,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
           </DialogHeader>
 
           <div className="flex flex-col gap-4 mt-2">
-            {/* Ảnh xe tại cổng - tự động từ camera */}
+            {/* Simulated gate camera image */}
             <div>
               <label className="text-sm font-medium text-[#1E293B] block mb-1.5">
                 Ảnh xe tại cổng (tự động)
@@ -591,7 +591,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               <p className="text-xs text-[#64748B] mt-1">Hình ảnh sẽ được chụp tự động khi xác nhận</p>
             </div>
 
-            {/* Số CCCD */}
+            {/* National identity card number */}
             <div>
               <label className="text-sm font-medium text-[#1E293B] block mb-1.5">
                 Số CCCD / CMND <span className="text-[#EF4444]">*</span>
@@ -604,7 +604,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               />
             </div>
 
-            {/* Upload ảnh chân dung */}
+            {/* Portrait upload */}
             <div>
               <label className="text-sm font-medium text-[#1E293B] block mb-1.5">
                 Ảnh chân dung người gửi xe <span className="text-[#EF4444]">*</span>
@@ -645,7 +645,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               )}
             </div>
 
-            {/* Nút xác nhận */}
+            {/* Confirmation button */}
             <div className="flex gap-2 mt-2">
               <Button
                 variant="outline"
@@ -666,7 +666,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
         </DialogContent>
       </Dialog>
 
-      {/* Dialog Khôi phục phiên thủ công */}
+      {/* Manual session recovery dialog */}
       <Dialog open={showRecoveryDialog} onOpenChange={handleCloseRecoveryDialog}>
         <DialogContent className="max-w-lg bg-white">
           <DialogHeader>
@@ -680,7 +680,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
           </DialogHeader>
 
           <div className="flex flex-col gap-4 mt-2">
-            {/* Quét thẻ */}
+            {/* Card scan */}
             <div>
               <label className="text-sm font-medium text-[#1E293B] block mb-1.5">
                 Quét thẻ xe <span className="text-[#EF4444]">*</span>
@@ -708,10 +708,10 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               )}
             </div>
 
-            {/* Thông tin từ thẻ - hiện sau khi quét */}
+            {/* Card details shown after scanning */}
             {recoveryCardScanned && recoveryCardInfo && (
               <>
-                {/* Thông tin chủ xe */}
+                {/* Vehicle owner details */}
                 <div className="bg-[#F0F9FF] border border-[#0284C7]/30 rounded-lg p-3">
                   <p className="text-xs font-medium text-[#64748B] uppercase tracking-wide mb-2">
                     Thông tin từ thẻ
@@ -742,7 +742,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
                   </div>
                 </div>
 
-                {/* Ảnh xe tại cổng - tự động từ camera */}
+                {/* Simulated gate camera image */}
                 <div>
                   <label className="text-sm font-medium text-[#1E293B] block mb-1.5">
                     Ảnh xe tại cổng (tự động)
@@ -758,7 +758,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
                   <p className="text-xs text-[#64748B] mt-1">Hình ảnh sẽ được chụp tự động khi xác nhận</p>
                 </div>
 
-                {/* Thông tin phiên khôi phục - lấy từ thẻ */}
+                {/* Recovered session details from the simulated card scan */}
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                   <p className="text-xs font-medium text-amber-700 uppercase tracking-wide mb-2">
                     Thông tin phiên khôi phục (từ thẻ)
@@ -788,7 +788,7 @@ export default function ExitException({ onToast, onBarrierChange }: ExitExceptio
               </span>
             </div>
 
-            {/* Nút xác nhận */}
+            {/* Confirmation button */}
             <div className="flex gap-2 mt-2">
               <Button
                 variant="outline"

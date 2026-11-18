@@ -1,6 +1,6 @@
 -- Seed data for Parking Lot Management System
 
--- Insert zones (Khu A-F)
+-- Insert zones A-F
 INSERT INTO zones (name, total_slots, status) VALUES
   ('Khu A', 100, 'active'),
   ('Khu B', 100, 'active'),
@@ -69,7 +69,7 @@ BEGIN
   SELECT id INTO zone_c_id FROM zones WHERE name = 'Khu C';
   SELECT id INTO zone_f_id FROM zones WHERE name = 'Khu F';
   
-  -- Occupy 55 slots in Khu A (45 available)
+  -- Occupy 55 slots in zone A (45 available)
   FOR slot_rec IN 
     SELECT id FROM parking_slots 
     WHERE zone_id = zone_a_id AND status = 'available' 
@@ -78,7 +78,7 @@ BEGIN
     UPDATE parking_slots SET status = 'occupied' WHERE id = slot_rec.id;
   END LOOP;
   
-  -- Occupy 10 slots in Khu B (90 available)
+  -- Occupy 10 slots in zone B (90 available)
   FOR slot_rec IN 
     SELECT id FROM parking_slots 
     WHERE zone_id = zone_b_id AND status = 'available' 
@@ -87,7 +87,7 @@ BEGIN
     UPDATE parking_slots SET status = 'occupied' WHERE id = slot_rec.id;
   END LOOP;
   
-  -- Occupy all 100 slots in Khu C (0 available)
+  -- Occupy all 100 slots in zone C (0 available)
   FOR slot_rec IN 
     SELECT id FROM parking_slots 
     WHERE zone_id = zone_c_id AND status = 'available' 
@@ -96,7 +96,7 @@ BEGIN
     UPDATE parking_slots SET status = 'occupied' WHERE id = slot_rec.id;
   END LOOP;
   
-  -- Occupy 70 slots in Khu F (30 available)
+  -- Occupy 70 slots in zone F (30 available)
   FOR slot_rec IN 
     SELECT id FROM parking_slots 
     WHERE zone_id = zone_f_id AND status = 'available' 

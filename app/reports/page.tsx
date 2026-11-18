@@ -26,7 +26,7 @@ import {
 import { AlertCircle, Download, FileSpreadsheet, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 
-// --- MOCK DATA CHO UC 7.2 (ĐỐI SOÁT BKPAY) ---
+// --- MOCK DATA FOR UC 7.2 (BKPAY RECONCILIATION) ---
 const reconciliationData = [
   { id: "TX1001", time: "2024-05-20 08:30", amount: 5000, internal: "Thành công", bkpay: "Thành công", status: "match" },
   { id: "TX1002", time: "2024-05-20 09:15", amount: 10000, internal: "Thành công", bkpay: "Thành công", status: "match" },
@@ -35,7 +35,7 @@ const reconciliationData = [
   { id: "TX1005", time: "2024-05-20 11:20", amount: 5000, internal: "Lỗi hệ thống", bkpay: "Thành công", status: "mismatch" },
 ];
 
-// --- MOCK DATA CHO UC 7.1 (HEATMAP/MẬT ĐỘ) ---
+// --- MOCK DATA FOR UC 7.1 (OCCUPANCY HEATMAP) ---
 const heatmapData = [
   { hour: "07:00", occupancy: 45, color: "#22c55e" },
   { hour: "08:00", occupancy: 85, color: "#eab308" },
@@ -86,7 +86,7 @@ export default function ReportsPage() {
     }
   }, [router]);
 
-  // Xử lý nút đối soát tức thời (Alternative Flow A1)
+  // Handle immediate reconciliation (Alternative Flow A1).
   const handleInstantReconcile = () => {
     setIsReconciling(true);
     toast.info("Hệ thống đang tiến hành đối soát ngầm với BKPay...");
@@ -129,7 +129,7 @@ export default function ReportsPage() {
             <TabsTrigger value="reconciliation">Đối soát BKPay</TabsTrigger>
           </TabsList>
 
-          {/* --- PHÂN HỆ UC 7.1: BIỂU ĐỒ NHIỆT --- */}
+          {/* --- UC 7.1: OCCUPANCY HEATMAP --- */}
           <TabsContent value="heatmap" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
@@ -178,7 +178,7 @@ export default function ReportsPage() {
             </Card>
           </TabsContent>
 
-          {/* --- PHÂN HỆ UC 7.2: ĐỐI SOÁT BKPAY --- */}
+          {/* --- UC 7.2: BKPAY RECONCILIATION --- */}
           <TabsContent value="reconciliation" className="space-y-4">
             <div className="flex justify-between items-end gap-4 bg-muted/50 p-4 rounded-lg">
               <div className="flex gap-4">

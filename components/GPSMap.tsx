@@ -11,7 +11,7 @@ interface GPSMapProps {
   onClose: () => void
 }
 
-// Giả lập các slot trong khu vực
+// Generate simulated parking slots for a zone.
 const generateSlots = (zoneId: string) => {
   return Array.from({ length: 12 }).map((_, i) => ({
     id: `${zoneId}-${i + 1}`,
@@ -20,7 +20,7 @@ const generateSlots = (zoneId: string) => {
   }));
 };
 
-// Thông tin các khu vực
+// Zone information.
 const zoneInfo: Record<string, { name: string }> = {
   'A': { name: 'Khu A (Gần cổng)' },
   'B': { name: 'Khu B (Trung tâm)' },
@@ -34,12 +34,12 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
   const [isSimulating, setIsSimulating] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(-1)
   
-  // Tọa độ cổng vào cố định ở chính giữa
+  // Fixed entrance coordinates, centered horizontally.
   const ENTRANCE_X = 50
   const ENTRANCE_Y = 95
 
-  // Tọa độ mô phỏng vị trí hiện tại khi người dùng cho phép GPS.
-  // Cố tình đặt khác cổng vào để phân biệt rõ với trường hợp Từ chối GPS.
+  // Simulated current position when the user allows GPS.
+  // Offset it from the entrance to distinguish it from the GPS-denied route.
   const GPS_START_X = 58
   const GPS_START_Y = 78
 
@@ -56,18 +56,18 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
   const zone = selectedZoneId ? zoneInfo[selectedZoneId] : null
   const slots = selectedZoneId ? generateSlots(selectedZoneId) : []
   
-  // Tìm slot đã chọn
+  // Find the selected parking slot.
   const selectedSlotIndex = slots.findIndex(s => s.name === selectedSlotName)
   const isLeftColumn = selectedSlotIndex >= 0 && selectedSlotIndex < 6
   const rowIndex = isLeftColumn ? selectedSlotIndex : selectedSlotIndex - 6
 
-  // Vị trí đích đến trên sơ đồ (% của container) cho layout đối xứng mới
-  const targetX = isLeftColumn ? 22.5 : 77.5 // Cột trái 22.5%, Cột phải 77.5%
-  const targetY = selectedSlotIndex >= 0 ? 21.25 + (rowIndex * 12.5) : 50 // Căn dọc theo các ô đỗ
+  // Destination coordinates as percentages of the symmetric layout container.
+  const targetX = isLeftColumn ? 22.5 : 77.5 // Left column: 22.5%; right column: 77.5%.
+  const targetY = selectedSlotIndex >= 0 ? 21.25 + (rowIndex * 12.5) : 50 // Align vertically with the parking slots.
 
-  // Đồng bộ chế độ chỉ đường với lựa chọn ở popup GPS.
-  // - Cho phép GPS: bắt đầu từ vị trí hiện tại mô phỏng.
-  // - Từ chối GPS: bắt đầu từ cổng vào mặc định.
+  // Match the route mode to the choice in the GPS dialog.
+  // - GPS allowed: start at the simulated current position.
+  // - GPS denied: start at the default entrance.
   useEffect(() => {
     if (!isNavigating) return
 
@@ -78,7 +78,7 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
     setUserPosition({ x: sourceX, y: sourceY })
   }, [isNavigating, routeMode])
 
-  // Các bước chỉ dẫn cố định
+  // Fixed navigation steps.
   const getNavigationSteps = () => {
     if (selectedSlotIndex < 0) return []
     
@@ -109,7 +109,7 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
 
   const navigationSteps = getNavigationSteps()
 
-  // Mô phỏng di chuyển
+  // Simulate movement along the route.
   const startSimulation = () => {
     setIsSimulating(true)
     setCurrentStepIndex(-1)
@@ -197,14 +197,14 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
             </h3>
           </div>
 
-          {/* --- KHU VỰC ĐƯỜNG ĐI TRUNG TÂM (MÀU XÁM) --- */}
+          {/* --- CENTRAL DRIVEWAY (GRAY) --- */}
           <div className="absolute top-[8%] left-[35%] w-[30%] h-[92%] bg-[#8E9399] rounded-t-xl"></div>
           
-          {/* Vạch kẻ đường giữa */}
+          {/* Center road marking */}
           <div className="absolute top-[10%] left-[50%] -translate-x-1/2 w-[2px] h-[85%] border-l-2 border-dashed border-[#FCD34D]/70"></div>
 
-          {/* --- CÁC Ô ĐỖ XE --- */}
-          {/* Cột Trái (0-5) */}
+          {/* --- PARKING SLOTS --- */}
+          {/* Left column (0-5) */}
           <div className="absolute top-[15%] left-[10%] w-[25%] h-[75%] flex flex-col gap-2">
             {slots.slice(0, 6).map((slot, i) => {
               const isSelected = slot.name === selectedSlotName
@@ -223,7 +223,7 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
             })}
           </div>
 
-          {/* Cột Phải (6-11) */}
+          {/* Right column (6-11) */}
           <div className="absolute top-[15%] right-[10%] w-[25%] h-[75%] flex flex-col gap-2">
             {slots.slice(6, 12).map((slot, i) => {
               const isSelected = slot.name === selectedSlotName
@@ -242,7 +242,7 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
             })}
           </div>
 
-          {/* Nhãn Hàng */}
+          {/* Row labels */}
           <div className="absolute top-[11%] left-[22.5%] -translate-x-1/2 text-slate-800 font-bold text-[10px] md:text-xs bg-white/70 px-2 py-0.5 rounded">
             HÀNG TRÁI
           </div>
@@ -250,7 +250,7 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
             HÀNG PHẢI
           </div>
 
-          {/* --- ĐƯỜNG ĐI CHẤM XANH BẰNG SVG --- */}
+          {/* --- SVG NAVIGATION PATH --- */}
           {isNavigating && selectedSlotIndex >= 0 && (
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
               <path
@@ -261,9 +261,9 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
                 strokeDasharray={routeDashArray}
                 className="drop-shadow-sm"
               />
-              {/* Chấm tròn điểm bắt đầu */}
+              {/* Starting point marker */}
               <circle cx={`${sourceX}%`} cy={`${sourceY}%`} r="4" fill={routeColor} />
-              {/* Chấm tròn nhấp nháy ở đích */}
+              {/* Pulsing destination marker */}
               <circle cx={`${targetX}%`} cy={`${targetY}%`} r="6" fill="#10B981" stroke="white" strokeWidth="2" className="animate-pulse" />
             </svg>
           )}
@@ -286,7 +286,7 @@ export default function GPSMap({ selectedZoneId, selectedSlotName, isNavigating,
             </div>
           )}
 
-          {/* Nhãn cổng vào */}
+          {/* Entrance label */}
           <div className="absolute bottom-2 left-[50%] -translate-x-1/2 bg-white/95 text-slate-800 px-4 py-1.5 rounded text-[11px] font-bold shadow-md border-b-2 border-[#0284C7] z-10">
             CỔNG VÀO
           </div>

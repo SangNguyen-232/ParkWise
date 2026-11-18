@@ -1,255 +1,97 @@
-# BK-PARKING Smart Solution
+# ParkWise - BK-PARKING Smart Solution
 
-BK-PARKING Smart Solution là hệ thống quản lý bãi đỗ xe thông minh dành cho khuôn viên trường đại học. Hệ thống hỗ trợ quản lý bản đồ bãi xe, xử lý xe vào/ra, thanh toán phí gửi xe, báo cáo sự cố, vận hành cổng, giám sát thiết bị IoT, cấu hình hệ thống và báo cáo phân tích.
+ParkWise is a university parking management demonstration built with Next.js, React, and an Express mock server. It includes parking availability, simulated vehicle entry and exit, payments, incident reporting, gate operations, device monitoring, administration, and reporting screens.
 
-## 1. Mục tiêu hệ thống
+**Start with [GUIDE.md](GUIDE.md)** for prerequisites, cloning, installation, running both servers, demo accounts, verification, and troubleshooting.
 
-Hệ thống được xây dựng nhằm mô phỏng quy trình vận hành bãi xe thông minh trong môi trường trường đại học, bao gồm:
+## Technology
 
-- Định danh người dùng nội bộ bằng tài khoản hệ thống.
-- Tra cứu tình trạng bãi đỗ và chỉ đường đến ô trống.
-- Xử lý xe vào, xe ra cho người dùng nội bộ và khách vãng lai.
-- Thanh toán phí gửi xe qua BKPay.
-- Báo cáo và tiếp nhận sự cố tại bãi xe.
-- Quản lý phân quyền, chính sách giá và cấu hình bãi đỗ.
-- Giám sát trạng thái thiết bị IoT và cảnh báo vận hành.
-- Báo cáo, phân tích và đối soát giao dịch BKPay.
+| Component | Technology |
+| --- | --- |
+| Web application and route handlers | Next.js 16.2.0, React 19, TypeScript 5.7.3 |
+| Styling and interface | Tailwind CSS 4, Radix UI, lucide-react |
+| Separate mock API | Express 5, CORS |
+| Demo state | Browser localStorage and JavaScript objects in memory |
+| Dependency installation | pnpm with the committed lockfile |
 
-## 2. Công nghệ sử dụng
+## Main screens
 
-| Thành phần | Công nghệ |
-|---|---|
-| Frontend | Next.js, React, TypeScript |
-| Styling | Tailwind CSS |
-| Icon | lucide-react |
-| Backend mock | Express.js |
-| Lưu trạng thái demo | localStorage, mock API |
-| Package manager | pnpm |
+| Route | Demonstration | Intended role |
+| --- | --- | --- |
+| `/` | Login through the Express mock API | All demo accounts |
+| `/map` | Parking availability and simulated navigation | Students and faculty/staff; management and operations can inspect availability |
+| `/xe-vao` | Vehicle entry and card-processing scenarios | Operations |
+| `/xe-ra` | Vehicle exit and fee scenarios | Operations |
+| `/dashboard` | Demo account balance and debt | Students/internal users |
+| `/payment` | Simulated BKPay payment | Students/internal users |
+| `/history` | Transaction history and printable receipts | Students/internal users |
+| `/support/report` | Incident reporting and simulated emergency requests | Students and faculty/staff |
+| `/support/tickets` | Incident ticket handling | Operations |
+| `/gate-ops` | Exit exceptions, security alerts, and simulated barriers | Operations |
+| `/admin/dashboard` | Simulated IoT health | Operations |
+| `/admin/settings` | Pricing, internal user roles, and parking configuration | Management, IT, and operations, respectively |
+| `/reports` | Mock occupancy and reconciliation reports | Management |
 
-## 3. Cấu trúc thư mục chính
+The role column describes the intended UI workflow. It is not a claim of secure server-side authorization.
 
-```txt
-.
-├── app/
-│   ├── page.tsx                    # Trang đăng nhập
-│   ├── map/page.tsx                # UC3 - Bản đồ bãi xe
-│   ├── xe-vao/page.tsx             # UC1 - Xử lý xe vào
-│   ├── xe-ra/page.tsx              # UC1 - Xử lý xe ra
-│   ├── dashboard/page.tsx          # UC2 - Tổng quan tài khoản
-│   ├── payment/page.tsx            # UC2 - Thanh toán phí gửi xe
-│   ├── history/page.tsx            # UC2 - Lịch sử giao dịch
-│   ├── support/report/page.tsx     # UC4 - Báo cáo sự cố
-│   ├── support/tickets/page.tsx    # UC4 - Tiếp nhận sự cố
-│   ├── gate-ops/page.tsx           # UC5 - Vận hành cổng
-│   ├── admin/dashboard/page.tsx    # UC5.4 - Giám sát thiết bị IoT
-│   ├── admin/settings/page.tsx     # UC6 - Cấu hình hệ thống
-│   └── reports/page.tsx            # UC7 - Báo cáo và phân tích
-│
-├── components/
-│   ├── parking/                    # Header, camera, xử lý thẻ, UI bãi xe
-│   └── gate-ops/                   # Component vận hành cổng
-│
-├── lib/
-│   └── parking-data.ts             # Mock data dùng chung cho map, UC2, UC5, UC6, UC7
-│
-├── public/
-│   └── bk-logo.png                 # Logo BK dùng cho trang đăng nhập
-│
-└── server/
-    └── index.js                    # Backend mock API Express
+## Quick start
+
+After installing the prerequisites in [GUIDE.md](GUIDE.md):
+
+```sh
+git clone https://github.com/SangNguyen-232/ParkWise.git
+cd ParkWise
+pnpm install --frozen-lockfile
 ```
 
-## 4. Các chức năng đã tích hợp
+In one terminal, from the repository root:
 
-### UC1 - Xử lý xe vào / xe ra
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/xe-vao` | Xử lý xe vào, quét thẻ, nhận diện biển số, tạo phiên gửi xe | Vận hành |
-| `/xe-ra` | Xử lý xe ra, đối chiếu biển số, tính phí, đóng phiên gửi xe | Vận hành |
-
-### UC2 - Thanh toán và lịch sử giao dịch
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/dashboard` | Xem tổng quan tài khoản, dư nợ và số dư | Sinh viên / Người dùng nội bộ |
-| `/payment` | Thanh toán phí gửi xe qua BKPay | Sinh viên / Người dùng nội bộ |
-| `/history` | Tra cứu lịch sử giao dịch và xuất biên lai | Sinh viên / Người dùng nội bộ |
-
-### UC3 - Tra cứu tình trạng và định vị bãi đỗ
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/map` | Xem bản đồ bãi xe, chọn khu vực, chọn ô trống và chỉ đường | Sinh viên, Giảng viên/Cán bộ |
-
-Ghi chú:
-
-- Sinh viên và Giảng viên/Cán bộ được chọn ô trống và chỉ đường.
-- Ban quản lý và Vận hành có thể xem tình trạng bãi đỗ.
-- IT không phải tác nhân chính của UC3.
-
-### UC4 - Báo cáo sự cố thực địa
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/support/report` | Gửi báo cáo sự cố, nhập mô tả, tải ảnh minh chứng, SOS khẩn cấp | Sinh viên, Giảng viên/Cán bộ |
-| `/support/tickets` | Tiếp nhận, lọc và cập nhật trạng thái ticket sự cố | Vận hành |
-
-### UC5 - Vận hành cổng và xử lý ngoại lệ
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/gate-ops` | Xử lý mất thẻ, hỏng thẻ, cảnh báo an ninh và mở barrier khẩn cấp | Vận hành |
-
-### UC5.4 - Giám sát trạng thái thiết bị
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/admin/dashboard` | Theo dõi trạng thái cảm biến, gateway, bảng LED và cảnh báo IoT | Vận hành |
-
-### UC6 - Cấu hình hệ thống
-
-| Route | Tab | Role được chỉnh |
-|---|---|---|
-| `/admin/settings` | Quản lý chính sách | Ban quản lý |
-| `/admin/settings` | Quản lý phân quyền | IT |
-| `/admin/settings` | Quản lý bãi đỗ | Vận hành |
-
-### UC7 - Báo cáo và phân tích
-
-| Route | Mô tả | Role chính |
-|---|---|---|
-| `/reports` | Xem heatmap lấp đầy, đối soát BKPay, xuất PDF/Excel | Ban quản lý |
-
-## 5. Tài khoản demo
-
-| Username | Password | Role | Mục đích test |
-|---|---|---|---|
-| `bql01` | `123` | Ban quản lý | Chính sách giá, báo cáo UC7, xem map |
-| `it01` | `123` | IT | Quản lý phân quyền UC6 |
-| `bv01` | `123` | Vận hành | UC1, UC4 tickets, UC5, UC5.4, cấu hình bãi đỗ |
-| `sv01` | `123` | Sinh viên | UC2, UC3, UC4 report |
-| `gvcb01` | `123` | Giảng viên/Cán bộ | UC3, UC4 report |
-
-## 6. Hướng dẫn cài đặt và chạy project
-
-### Bước 1: Cài dependencies
-
-```bash
-pnpm install
-```
-
-### Bước 2: Chạy backend mock API
-
-Mở terminal thứ nhất:
-
-```bash
+```sh
 node server/index.js
 ```
 
-Backend chạy tại:
+In a second terminal, from the same repository root:
 
-```txt
-http://localhost:3001
+```sh
+pnpm dev --port 3000
 ```
 
-### Bước 3: Chạy frontend
+Open [http://localhost:3000](http://localhost:3000). The Express server must remain available at [http://localhost:3001](http://localhost:3001) for the login request.
 
-Mở terminal thứ hai:
+| Username | Password | Demo role |
+| --- | --- | --- |
+| `bql01` | `123` | Management |
+| `it01` | `123` | IT |
+| `bv01` | `123` | Operations |
+| `sv01` | `123` | Student |
+| `gvcb01` | `123` | Faculty/staff |
 
-```bash
-pnpm dev
+The legacy accounts `gv01` and `cb01` also use password `123` and the shared faculty/staff role.
+
+## Repository layout
+
+```text
+app/                 Pages and Next.js API route handlers
+components/          Parking screens, gate operations, and shared UI
+hooks/               Shared React hooks
+lib/parking-data.ts  Shared mock data and demonstration logic
+public/              Static images and assets
+scripts/             Optional PostgreSQL schema and seed examples
+server/index.js      Independent Express mock API
+GUIDE.md             Detailed setup and verification instructions
 ```
 
-Frontend chạy tại:
+## Current limitations
 
-```txt
-http://localhost:3000
-```
+- No database, real SSO, payment gateway, camera, card reader, barrier, or IoT hardware is connected.
+- Browser storage, Next.js mock state, and Express mock state are separate. They do not form a synchronized backend.
+- Demo login returns a profile stored in localStorage. It does not issue a secure session or enforce production authorization.
+- The billing API uses a shared mock account rather than a separate account for each login.
+- GPS navigation uses simulated positions and paths.
+- The reports page uses local mock data; its PDF/Excel buttons show notifications rather than downloading reports. The receipt route separately returns printable HTML.
+- Browser data can be cleared; server memory is lost on restart and can be reset by development reloads.
+- There is no automated test suite. The lint script currently lacks an ESLint dependency and configuration, and the build configuration ignores TypeScript errors. See the separate verification steps in [GUIDE.md](GUIDE.md).
 
-### Bước 4: Đăng nhập hệ thống
+## Contribution language
 
-Truy cập:
-
-```txt
-http://localhost:3000
-```
-
-Sau đó đăng nhập bằng một trong các tài khoản demo ở trên.
-
-## 7. Lưu ý khi test
-
-Nếu hệ thống hiển thị sai role, sai dữ liệu map hoặc vẫn giữ trạng thái cũ, hãy xóa localStorage trong trình duyệt:
-
-```txt
-DevTools → Application → Local Storage → Clear
-```
-
-Hoặc xóa riêng key:
-
-```txt
-bk_parking_zones_v1
-```
-
-Sau đó đăng xuất và đăng nhập lại.
-
-## 8. Dữ liệu và API mock
-
-Backend hiện dùng dữ liệu mock trong `server/index.js`, bao gồm:
-
-- Danh sách tài khoản và role.
-- API đăng nhập.
-- API khu vực bãi đỗ và ô đỗ.
-- API check-in/check-out xe.
-- API báo cáo, heatmap và đối soát BKPay.
-
-Một số trạng thái thao tác trong demo được lưu bằng `localStorage`, ví dụ trạng thái bãi đỗ, ticket sự cố hoặc phiên xử lý tạm thời.
-
-## 9. Các route quan trọng
-
-```txt
-/                     Trang đăng nhập
-/map                  Bản đồ bãi xe
-/xe-vao               Xử lý xe vào
-/xe-ra                Xử lý xe ra
-/dashboard            Tổng quan tài khoản
-/payment              Thanh toán BKPay
-/history              Lịch sử giao dịch
-/support/report       Báo cáo sự cố
-/support/tickets      Tiếp nhận sự cố
-/gate-ops             Vận hành cổng
-/admin/dashboard      Giám sát thiết bị IoT
-/admin/settings       Cấu hình hệ thống
-/reports              Báo cáo và phân tích
-```
-
-## 10. Trạng thái hoàn thiện
-
-Hệ thống hiện đã tích hợp các use case chính:
-
-- UC1: Xử lý xe vào / xe ra.
-- UC2: Thanh toán và lịch sử giao dịch.
-- UC3: Bản đồ bãi xe và chỉ đường.
-- UC4: Báo cáo sự cố.
-- UC5: Vận hành cổng và xử lý ngoại lệ.
-- UC5.4: Giám sát trạng thái thiết bị.
-- UC6: Cấu hình hệ thống.
-- UC7: Báo cáo và phân tích.
-
-## 11. Hạn chế hiện tại
-
-- Dữ liệu chủ yếu là mock data, chưa kết nối cơ sở dữ liệu thật.
-- Các thao tác thanh toán, đối soát và cảnh báo IoT đang mô phỏng.
-- Một số trạng thái chỉ được lưu ở localStorage nên có thể mất khi clear trình duyệt.
-- Chưa triển khai xác thực SSO thật.
-- Chưa triển khai phân quyền backend ở mức production.
-
-## 12. Hướng phát triển
-
-- Kết nối cơ sở dữ liệu thật cho người dùng, phiên gửi xe, ticket và giao dịch.
-- Tích hợp HCMUT_SSO và HCMUT_DATACORE.
-- Tích hợp cảm biến IoT thật cho từng ô đỗ.
-- Tích hợp BKPay thật thay vì mock payment.
-- Bổ sung audit log cho các thao tác vận hành và quản trị.
-- Hoàn thiện dashboard phân tích theo thời gian thực.
-
+All source-code comments, README content, guides, documentation, and contributor instructions must be written in English. Keep `GUIDE.md` synchronized with changes to setup, commands, dependencies, configuration, and verification. Existing localized UI text, API messages, and demo data retain their current language.

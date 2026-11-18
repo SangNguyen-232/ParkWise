@@ -176,7 +176,7 @@ export function writeParkingZonesToStorage(nextZones: ParkingZone[]) {
 }
 
 // ===============================
-// UC2 - Thanh toán và lịch sử phí
+// UC2 - Payments and fee history
 // ===============================
 
 export interface Transaction {
@@ -412,7 +412,7 @@ export class PaymentTransactionEntity {}
 
 
 // ===============================
-// UC5 - Vận hành cổng / xử lý ngoại lệ xe ra
+// UC5 - Gate operations and vehicle exit exceptions
 // ===============================
 
 export type UserType = 'guest' | 'student' | 'staff';
@@ -560,7 +560,7 @@ export function formatDuration(checkInTime: Date): string {
 }
 
 // ===============================
-// UC5.4 - Giám sát trạng thái thiết bị IoT
+// UC5.4 - IoT device status monitoring
 // ===============================
 
 export type IotDeviceType = 'sensor' | 'gateway' | 'led';
