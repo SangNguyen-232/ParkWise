@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (otp === '000000') {
-      return NextResponse.json({ success: false, message: 'Mật khẩu không hợp lệ.' }, { status: 400 });
+      return NextResponse.json({ success: false, message: 'Mật khẩu không đúng.' }, { status: 400 });
     }
 
     const result = processPayment(transactionIds);
